@@ -4,6 +4,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   ssr: false,
+  app: {
+    baseURL: process.env.NUXT_APP_BASE_URL || (process.env.NODE_ENV === 'production' ? '/Nuxt-ToDo-test/' : '/'),
+  },
+  nitro: {
+    preset: 'github_pages',
+  },
   css: [
     '@/assets/styles/_normalize.scss',
     '@/assets/styles/_fonts.scss',
