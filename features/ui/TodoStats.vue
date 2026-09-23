@@ -12,7 +12,8 @@ const completedCount = computed(() => {
 
 <template>
   <div class="todo__info">
-    <div class="todo__total-tasks">Tasks done: {{ completedCount }}</div>
+    <div class="todo__total-tasks">Задач: {{todoList.length}}</div>
+    <div class="todo__total-tasks">Выполненых задач: {{ completedCount }}</div>
   </div>
 </template>
 
@@ -22,22 +23,8 @@ const completedCount = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  column-gap: 16px;
-  font-weight: 600;
-}
-
-.todo__delete-all-button {
-  padding: 0;
-  background-color: transparent;
-  border: none;
-
-  &:hover {
-    color: $color-gray-4;
-  }
-
-  &:not(.is-visible) {
-    opacity: 0;
-    visibility: hidden;
-  }
+  column-gap: 14px;
+  font-weight: 500;
+  color: $color-dark-2;
 }
 </style>

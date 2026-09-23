@@ -9,9 +9,17 @@ import { vTooltip } from '@/shared/directives/vTooltip'
 const title = defineModel<string>()
 
 const emit = defineEmits<{
-  (e: 'deleteNote'): void
-  (e: 'blur'): void
+  deleteNote: []
+  blur: []
 }>()
+
+function onDeleteNote() {
+  emit('deleteNote')
+}
+
+function onBlur() {
+  emit('blur')
+}
 </script>
 
 <template>
@@ -20,11 +28,11 @@ const emit = defineEmits<{
       placeholder="Введите название..."
       :size="InputSize.Medium"
       v-model="title"
-      @blur="emit('blur')"
+      @blur="onBlur"
     />
     <Button
       :variant="ButtonVariant.Icon"
-      @click="emit('deleteNote')"
+      @click="onDeleteNote"
       v-tooltip="'Удалить'"
       ariaLabel="Удалить заметку"
     >

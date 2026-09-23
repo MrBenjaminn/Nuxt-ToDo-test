@@ -1,23 +1,43 @@
 <script setup lang="ts">
 import TodoItem from '@/entities/ui/TodoItem.vue'
 import { type itemTodo } from '@/entities/type/type'
-
-enum emitsActions {
-  Delete = 'delete',
-  Toggle = 'toggle',
-  Blur = 'blur',
-}
-
-defineProps<{
+const props = defineProps<{
   flag?: boolean
   todoListCard?: itemTodo[]
 }>()
 
 const emit = defineEmits<{
-  (e: emitsActions.Delete, id: string): void
-  (e: emitsActions.Toggle, id: string): void
-  (e: emitsActions.Blur): void
+  toggle: [id:string]
+  delete: [id:string]
+  blur:[]
 }>()
+
+function onToggle(id: string) {
+  emit('toggle', id)
+}
+
+function onDelete(id: string) {
+  emit('delete', id)
+}
+
+function onBlur() {
+  emit('blur')
+}
+
+const displayedTodoList = computed(() => {
+  const list = props.todoListCard || []
+  return props.flag ? list : list.slice(0, 4)
+})
+
+const hiddenCount = computed(() => {
+  const list = props.todoListCard || []
+  return !props.flag && list.length > 4 ? list.length - 4 : 0
+})
+
+const shortCutText = computed(() => {
+  return hiddenCount.value === 1
+    ? 'пункт' : hiddenCount.value < 5
+      ? 'пункта' : 'пунктов'})
 </script>
 
 <template>
@@ -27,18 +47,24 @@ const emit = defineEmits<{
   >
     <TodoItem
       :isEditing="flag"
-      v-for="el in todoListCard"
+      v-for="el in displayedTodoList"
       v-model="el.text"
       v-model:done="el.done"
-      @toggle="emit(emitsActions.Toggle, el.id)"
-      @delete="emit(emitsActions.Delete, el.id)"
-      @blur="emit(emitsActions.Blur)"
+      @toggle="onToggle(el.id)"
+      @delete="onDelete(el.id)"
+      @blur="onBlur"
       :key="el.id"
     />
   </ul>
   <div
+    class="todo__more-hint"
+    v-if="hiddenCount > 0"
+  >
+    ...и еще {{ hiddenCount }} {{ shortCutText }}
+  </div>
+  <div
     class="todo__empty-message"
-    v-else
+    v-else-if="!props.todoListCard?.length"
   >
     Нет заметок
   </div>
@@ -83,5 +109,10 @@ $todoListRowGap: 8px;
 .todo__empty-message {
   text-align: center;
   color: $color-gray-4;
+}
+
+.todo__more-hint {
+  text-align: center;
+  color: $color-gray-3;
 }
 </style>

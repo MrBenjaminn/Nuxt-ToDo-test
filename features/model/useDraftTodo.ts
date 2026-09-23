@@ -9,6 +9,17 @@ export function useNoteDraft(noteId?: string) {
 
   const draftKey = `note_draft_${noteId}`
 
+  const isEmptyTodo = computed(() => {
+    if (!draftNote.value) return true
+
+    const isTitleEmpty = !draftNote.value.title.trim()
+    const isTodoListEmpty =
+      draftNote.value.todoList.length === 0 ||
+      draftNote.value.todoList.every((item) => !item.text.trim())
+
+    return isTitleEmpty && isTodoListEmpty
+  })
+
   const { undo, redo, canUndo, canRedo, handleBlur, recordAtomic, clearHistory } = useHistory(
     draftNote,
     draftKey,
@@ -121,5 +132,6 @@ export function useNoteDraft(noteId?: string) {
     handleBlur,
     save,
     discardDraft,
+    isEmptyTodo
   }
 }

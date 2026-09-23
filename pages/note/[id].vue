@@ -14,6 +14,7 @@ import { useTodoRouteGuard } from '@/features/model/useTodoRouteGuard'
 import { useTodoModals } from '@/shared/ui/modal/model/useTodoModals'
 import { vFocusTrap } from '@/shared/directives/vFocusTrap'
 
+
 const route = useRoute()
 const router = useRouter()
 const noteId = route.params.id as string
@@ -65,6 +66,7 @@ const {
   handleBlur,
   save,
   discardDraft,
+  isEmptyTodo
 } = useNoteDraft(todoId)
 
 useKeybind(
@@ -80,17 +82,6 @@ onMounted(() => {
   if (isDraftDirty.value) {
     activeModal.value = 'restore'
   }
-})
-
-const isEmptyTodo = computed(() => {
-  if (!draftNote.value) return true
-
-  const isTitleEmpty = !draftNote.value.title.trim()
-  const isTodoListEmpty =
-    draftNote.value.todoList.length === 0 ||
-    draftNote.value.todoList.every((item) => !item.text.trim())
-
-  return isTitleEmpty && isTodoListEmpty
 })
 
 function onRequestDelete() {
@@ -123,7 +114,7 @@ watch(
       router.replace('/')
     }
   },
-  { immediate: true },
+  { immediate: false },
 )
 </script>
 

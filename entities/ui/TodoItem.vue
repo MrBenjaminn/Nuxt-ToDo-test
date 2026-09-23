@@ -11,13 +11,33 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'delete'): void
-  (e: 'toggle'): void
-  (e: 'blur'): void
+  delete: []
+  toggle: []
+  blur: []
 }>()
+
+function onToggle() {
+  emit('toggle')
+}
+
+function onDelete() {
+  emit('delete')
+}
+
+function onBlur() {
+  emit('blur')
+}
 
 const textModel = defineModel<string>({ default: '' })
 const isDoneModel = defineModel<boolean>('done', { default: false })
+
+const truncatedText = computed(() => {
+  const text = textModel.value || ''
+  if (text.length > 20) {
+    return text.slice(0, 20) + '...'
+  }
+  return text
+})
 </script>
 
 <template>
@@ -26,26 +46,26 @@ const isDoneModel = defineModel<boolean>('done', { default: false })
       <CheckBox
         :labelShow="false"
         :modelValue="isDoneModel"
-        @update:modelValue="emit('toggle')"
+        @update:modelValue="onToggle"
       />
       <Input
         v-model="textModel"
         :size="InputSize.Small"
         :isDone="isDoneModel"
-        @blur="emit('blur')"
+        @blur="onBlur"
         :class="{ 'inline-edit__input--done': isDoneModel }"
       />
       <Button
         :variant="ButtonVariant.Secondary"
         :aria-label="'Удалить задачу'"
-        @click="emit('delete')"
+        @click="onDelete"
       >
         <SmallDeleteMark />
       </Button>
     </template>
     <template v-else>
       <CheckBox
-        :label="textModel"
+        :label="truncatedText"
         :disabled="true"
         v-model="isDoneModel"
         :class="{ 'todo-item__label--done': isDoneModel }"

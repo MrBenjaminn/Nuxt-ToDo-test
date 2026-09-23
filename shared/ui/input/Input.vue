@@ -5,12 +5,10 @@ defineOptions({
   inheritAttrs: false,
 })
 
-interface Props {
+withDefaults(defineProps<{
   placeholder?: string
   size?: InputSize
-}
-
-withDefaults(defineProps<Props>(), {
+}>(), {
   size: InputSize.Medium,
   placeholder: '',
 })
@@ -20,8 +18,12 @@ const model = defineModel<string>({
 })
 
 const emit = defineEmits<{
-  (e: 'blur', event: FocusEvent): void
+  blur: [event: FocusEvent]
 }>()
+
+function onBlur(event: FocusEvent) {
+  emit('blur', event)
+}
 </script>
 
 <template>
@@ -31,7 +33,7 @@ const emit = defineEmits<{
     :class="['inline-edit__input', `inline-edit__input--${size}`]"
     :placeholder="placeholder"
     v-model="model"
-    @blur="emit('blur', $event)"
+    @blur="onBlur"
   />
 </template>
 

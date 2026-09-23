@@ -9,6 +9,12 @@ export function useTodoRouteGuard(isDraftDirty: Ref<boolean>, activeModal: Ref<M
   const rawId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
   const todoId = rawId ?? ''
 
+  if (import.meta.client && store.allTodos.length === 0) {
+    store.initStore()
+  }
+
+  const note = computed(() => store.getNoteById(todoId))
+
   if (!todoId) {
     showError({
       statusCode: 404,
@@ -17,11 +23,6 @@ export function useTodoRouteGuard(isDraftDirty: Ref<boolean>, activeModal: Ref<M
     })
   }
 
-  if (import.meta.client && store.allTodos.length === 0) {
-    store.initStore()
-  }
-
-  const note = computed(() => store.getNoteById(todoId))
 
   function checkNoteExists() {
     if (!note.value) {

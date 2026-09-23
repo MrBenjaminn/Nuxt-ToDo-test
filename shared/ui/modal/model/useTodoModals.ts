@@ -2,10 +2,10 @@ import { ref, computed } from 'vue'
 import { type ModalType } from '@/shared/ui/modal/type/type'
 
 interface UseNoteModalsParams {
-  onDelete: () => Promise<void>
-  onSaveRestore: () => Promise<void>
-  onRejectRestore: () => Promise<void>
-  onConfirmCancel: () => Promise<void>
+  onDelete?: () => Promise<void>
+  onSaveRestore?: () => Promise<void>
+  onRejectRestore?: () => Promise<void>
+  onConfirmCancel?: () => Promise<void>
   onConfirmEmptyDelete?: () => Promise<void>
 }
 

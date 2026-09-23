@@ -4,18 +4,45 @@ import Todo from '@/widgets/ui/Todo.vue'
 import TodoList from '@/entities/ui/TodoList.vue'
 import { useTodoStore } from '@/entities/model/store'
 import TodoStats from '@/features/ui/TodoStats.vue'
-import { ButtonType, ButtonVariant } from '@/shared/ui/Button/model/type'
+import {
+  ButtonSize,
+  ButtonType,
+  ButtonVariant
+} from '@/shared/ui/Button/model/type'
+import { useTodoModals } from "@/shared/ui/modal/model/useTodoModals.ts";
+import Modal from "@/shared/ui/modal/Modal.vue";
 
-const BUTTON_LABELS = {
-  CHANGE: 'Редактировать',
-  DELETE: 'Удалить',
-  CREATE: 'Создать заметку',
+const buttonLabels = {
+  change: 'Редактировать',
+  delete: 'Удалить',
+  create: 'Создать заметку',
 } as const
 
 const store = useTodoStore()
+const noteToDeleteId = ref<string | null>(null)
 function handleCreateNote() {
   const newNoteId = store.addTodoCard()
   navigateTo(`/note/${newNoteId}`)
+}
+
+const {
+  activeModal,
+  isModalOpen,
+  modalConfig,
+  handleConfirm,
+  handleCancel,
+} = useTodoModals({
+  onDelete: async () => {
+    if (noteToDeleteId.value) {
+      store.deleteTodoCard(noteToDeleteId.value)
+      noteToDeleteId.value = null
+    }
+  }
+})
+
+function openDeleteModal(id: string) {
+  noteToDeleteId.value = id
+  activeModal.value = 'delete'
 }
 </script>
 
@@ -24,7 +51,7 @@ function handleCreateNote() {
     <header class="header">
       <Button
         :variant="ButtonVariant.Primary"
-        :text="BUTTON_LABELS.CREATE"
+        :text="buttonLabels.create"
         :buttonType="ButtonType.Button"
         @click="handleCreateNote"
       />
@@ -49,18 +76,43 @@ function handleCreateNote() {
           <template #actions>
             <Button
               :variant="ButtonVariant.Primary"
-              :text="BUTTON_LABELS.CHANGE"
+              :text="buttonLabels.change"
               :buttonType="ButtonType.Button"
               @click="navigateTo(`/note/${el.id}`)"
             />
             <Button
               :variant="ButtonVariant.Primary"
-              :text="BUTTON_LABELS.DELETE"
+              :text="buttonLabels.delete"
               :buttonType="ButtonType.Button"
-              @click="store.deleteTodoCard(el.id)"
+              @click="openDeleteModal(el.id)"
             />
           </template>
         </Todo>
+        <Modal
+          v-if="modalConfig"
+          v-model:is-open="isModalOpen"
+          :title="modalConfig.title"
+        >
+          <p>{{ modalConfig.text }}</p>
+
+          <template #footer>
+            <Button
+              :type="ButtonType.Button"
+              :variant="ButtonVariant.Tertiary"
+              @click="handleCancel"
+            >
+              {{ modalConfig.cancelText }}
+            </Button>
+            <Button
+              :type="ButtonType.Button"
+              :variant="ButtonVariant.Primary"
+              @click="handleConfirm"
+              :size="ButtonSize.Big"
+            >
+              {{ modalConfig.confirmText }}
+            </Button>
+          </template>
+        </Modal>
       </section>
     </main>
   </div>

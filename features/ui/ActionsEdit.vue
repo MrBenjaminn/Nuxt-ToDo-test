@@ -6,26 +6,35 @@ import Button from '@/shared/ui/Button/Button.vue'
 import { ButtonVariant } from '@/shared/ui/Button/model/type'
 import { vTooltip } from '@/shared/directives/vTooltip'
 
-const InfoButtonActions = {
+const InfoButtons = {
   Back: 'назад',
   Undo: 'отменить',
   Redo: 'повторить',
   Save: 'сохранить',
 } as const
 
-enum ButtonActions  {
-  Back = 'back',
-  Save = 'save',
-  Redo = 'redo',
-  Undo = 'undo',
+const emit = defineEmits<{
+  back:[]
+  save:[]
+  redo:[]
+  undo:[]
+}>()
+
+function onBack() {
+  emit('back')
 }
 
-const emit = defineEmits<{
-  (e: ButtonActions.Back): void
-  (e: ButtonActions.Save): void
-  (e: ButtonActions.Redo): void
-  (e: ButtonActions.Undo): void
-}>()
+function onUndo() {
+  emit('undo')
+}
+
+function onRedo() {
+  emit('redo')
+}
+
+function onSave() {
+  emit('save')
+}
 
 withDefaults(
   defineProps<{
@@ -43,40 +52,40 @@ withDefaults(
   <div class="todo__actions">
     <Button
       :variant="ButtonVariant.Icon"
-      v-tooltip="InfoButtonActions.Back"
-      @click="emit(ButtonActions.Back)"
-      :aria-label="InfoButtonActions.Back"
+      v-tooltip="InfoButtons.Back"
+      @click="onBack"
+      :aria-label="InfoButtons.Back"
     >
       <BackArrow />
     </Button>
 
     <Button
       :variant="ButtonVariant.Icon"
-      v-tooltip="InfoButtonActions.Undo"
+      v-tooltip="InfoButtons.Undo"
       :disabled="!canUndo"
-      @click="emit(ButtonActions.Undo)"
-      :aria-label="InfoButtonActions.Undo"
+      @click="onUndo"
+      :aria-label="InfoButtons.Undo"
     >
       <UndoRedoArrow class="undo" />
     </Button>
 
     <Button
       :variant="ButtonVariant.Icon"
-      v-tooltip="InfoButtonActions.Redo"
+      v-tooltip="InfoButtons.Redo"
       :disabled="!canRedo"
-      @click="emit(ButtonActions.Redo)"
-      :aria-label="InfoButtonActions.Redo"
+      @click="onRedo"
+      :aria-label="InfoButtons.Redo"
     >
-      <UndoRedoArrow class="redo" />
+      <UndoRedoArrow />
     </Button>
 
     <Button
       :variant="ButtonVariant.Icon"
-      v-tooltip="InfoButtonActions.Save"
-      @click="emit(ButtonActions.Save)"
-      :aria-label="InfoButtonActions.Save"
+      v-tooltip="InfoButtons.Save"
+      @click="onSave"
+      :aria-label="InfoButtons.Save"
     >
-      <Save class="redo" />
+      <Save />
     </Button>
   </div>
 </template>
