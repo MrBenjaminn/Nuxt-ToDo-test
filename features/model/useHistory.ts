@@ -1,10 +1,9 @@
-function safeClone<T>(val: T): T {
-  if (!val) return val
-  return JSON.parse(JSON.stringify(val))
-}
+import { safeClone } from '../../shared/lib/cloneObj'
+import { ref, computed, watch, nextTick, type Ref } from 'vue'
 
 export function useHistory<T>(
   targetRef: Ref<T | null | undefined>,
+  storageKey?: string,
   maxSteps = 50,
   debounceMs = 500,
 ) {
@@ -16,18 +15,57 @@ export function useHistory<T>(
   let pendingState: T | null = null
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-  function commitPendingState() {
+  if (storageKey && import.meta.client) {
+    const savedHistory = sessionStorage.getItem(`${storageKey}_history`)
+    if (savedHistory) {
+      try {
+        const parsed = JSON.parse(savedHistory)
+        if (Array.isArray(parsed.history) && Array.isArray(parsed.redoStack)) {
+          history.value = parsed.history
+          redoStack.value = parsed.redoStack
+        }
+      } catch (e) {
+        console.error('Ошибка чтения истории из sessionStorage:', e)
+      }
+    }
+  }
+
+  function saveHistoryToStorage() {
+    if (!storageKey || !import.meta.client) return
+
+    const dataToSave = {
+      history: history.value,
+      redoStack: redoStack.value,
+    }
+    sessionStorage.setItem(`${storageKey}_history`, JSON.stringify(dataToSave))
+  }
+
+  function pushToHistory(state: T) {
+    const lastHistoryState = history.value[history.value.length - 1]
+
+    if (lastHistoryState && JSON.stringify(lastHistoryState) === JSON.stringify(state)) {
+      return
+    }
+
+    if (history.value.length >= maxSteps) {
+      history.value.shift()
+    }
+    history.value.push(safeClone(state))
+    redoStack.value = []
+
+    saveHistoryToStorage()
+  }
+
+  function commit() {
     if (debounceTimer) {
       clearTimeout(debounceTimer)
       debounceTimer = null
     }
 
+    if (isUndoingOrRedoing) return
+
     if (pendingState !== null) {
-      if (history.value.length >= maxSteps) {
-        history.value.shift()
-      }
-      history.value.push(pendingState)
-      redoStack.value = []
+      pushToHistory(pendingState)
       pendingState = null
     }
 
@@ -46,22 +84,29 @@ export function useHistory<T>(
         return
       }
 
-      if (!debounceTimer && pendingState === null) {
+      if (pendingState === null) {
         pendingState = safeClone(lastState)
       }
 
-      if (debounceTimer) clearTimeout(debounceTimer)
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+      }
 
       debounceTimer = setTimeout(() => {
-        commitPendingState()
+        commit()
       }, debounceMs)
     },
     { deep: true },
   )
 
+  onUnmounted(() => {
+    if (debounceTimer) clearTimeout(debounceTimer)
+  })
+
   function undo() {
-    if (pendingState !== null) {
-      commitPendingState()
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
     }
 
     if (history.value.length === 0 || !targetRef.value) return
@@ -75,6 +120,9 @@ export function useHistory<T>(
 
     targetRef.value = safeClone(previousState)
     lastState = safeClone(previousState)
+    pendingState = null
+
+    saveHistoryToStorage()
 
     nextTick(() => {
       isUndoingOrRedoing = false
@@ -82,9 +130,11 @@ export function useHistory<T>(
   }
 
   function redo() {
-    if (pendingState !== null) {
-      commitPendingState()
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
     }
+    pendingState = null
 
     if (redoStack.value.length === 0 || !targetRef.value) return
 
@@ -98,29 +148,47 @@ export function useHistory<T>(
     targetRef.value = safeClone(nextState)
     lastState = safeClone(nextState)
 
+    saveHistoryToStorage()
+
     nextTick(() => {
       isUndoingOrRedoing = false
     })
   }
 
-  function recordState(newState: T) {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer)
-      debounceTimer = null
-      pendingState = null
+  function handleBlur() {
+    commit()
+  }
+
+  function recordAtomic(mutationFn: () => void) {
+    if (debounceTimer || pendingState !== null) {
+      commit()
     }
 
-    if (isUndoingOrRedoing) return
-
-    const snapshot = safeClone(newState)
-
-    if (history.value.length >= maxSteps) {
-      history.value.shift()
+    if (targetRef.value) {
+      pushToHistory(safeClone(targetRef.value))
     }
 
-    history.value.push(snapshot)
+    isUndoingOrRedoing = true
+
+    mutationFn()
+
+    if (targetRef.value) {
+      lastState = safeClone(targetRef.value)
+    }
+
+    nextTick(() => {
+      isUndoingOrRedoing = false
+    })
+  }
+
+  function clearHistory() {
+    history.value = []
     redoStack.value = []
-    lastState = snapshot
+    pendingState = null
+    if (debounceTimer) clearTimeout(debounceTimer)
+    if (storageKey && import.meta.client) {
+      sessionStorage.removeItem(`${storageKey}_history`)
+    }
   }
 
   const canUndo = computed(() => history.value.length > 0 || pendingState !== null)
@@ -131,6 +199,8 @@ export function useHistory<T>(
     redo,
     canUndo,
     canRedo,
-    recordState,
+    handleBlur,
+    recordAtomic,
+    clearHistory
   }
 }

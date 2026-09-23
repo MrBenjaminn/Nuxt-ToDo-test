@@ -1,28 +1,29 @@
 <script setup lang="ts">
-import BaseInput from '@/shared/ui/BaseInput.vue'
+import Input from '@/shared/ui/input/Input.vue'
 import CheckBox from '@/shared/ui/CheckBox.vue'
 import Button from '@/shared/ui/Button/Button.vue'
 import { ButtonVariant } from '@/shared/ui/Button/model/type'
+import { InputSize } from '#shared/ui/input/model/type.ts'
+
+enum emitsActions {
+  Delete = 'delete',
+  Toggle = 'toggle',
+  Blur = 'blur'
+}
 
 const props = defineProps<{
   isEditing?: boolean
-  text?: string
-  elId?: string
+  done?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'delete', id: string): void
+  (e: emitsActions.Delete): void
+  (e: emitsActions.Toggle): void
+  (e: emitsActions.Blur): void
 }>()
 
 const textModel = defineModel<string>({ default: '' })
-
 const isDoneModel = defineModel<boolean>('done', { default: false })
-
-function handleDeleteTask() {
-  if (props.elId) {
-    emit('delete', props.elId)
-  }
-}
 </script>
 
 <template>
@@ -30,16 +31,19 @@ function handleDeleteTask() {
     <template v-if="isEditing">
       <CheckBox
         :labelShow="false"
-        v-model="isDoneModel"
+        :modelValue="props.done"
+        @update:modelValue="emit(emitsActions.Toggle)"
       />
-      <BaseInput
+      <Input
         v-model="textModel"
-        size="sm"
+        :size="InputSize.Small"
         :isDone="isDoneModel"
+        @blur="emit(emitsActions.Blur)"
+        :class="{ 'inline-edit__input--done': isDoneModel }"
       />
       <Button
         :variant="ButtonVariant.Secondary"
-        @click="handleDeleteTask"
+        @click="emit(emitsActions.Delete)"
       >
         <svg
           width="20"
@@ -60,10 +64,10 @@ function handleDeleteTask() {
     </template>
     <template v-else>
       <CheckBox
-        :labelText="textModel"
-        :labelShow="true"
-        :checkBoxDisabled="true"
+        :label="textModel"
+        :disabled="true"
         v-model="isDoneModel"
+        :class="{ 'todo-item__label--done': isDoneModel }"
       />
     </template>
   </li>
@@ -83,7 +87,7 @@ $todoListRowGap: 8px;
   transition-duration: $transition-duration;
   height: 45px;
 
-  &:hover {
+  &:hover{
     background-color: $color-gray-1;
   }
 
@@ -99,6 +103,20 @@ $todoListRowGap: 8px;
       transition-duration: $transition-duration;
       pointer-events: none;
     }
+  }
+
+  &__label--done {
+    :deep(.item-checkbox__label) {
+      color: $color-gray-4;
+      text-decoration: line-through;
+    }
+  }
+}
+
+.todo-item__label--done {
+  :deep(.item-checkbox__label) {
+    text-decoration: line-through;
+    color: $color-gray-4;
   }
 }
 </style>

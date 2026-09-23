@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import TodoItem from '@/entities/ui/TodoItem.vue'
-import type { itemTodo } from '@/entities/type/type'
+import  { type itemTodo, } from '@/entities/type/type'
+
+enum emitsActions {
+  Delete = 'delete',
+  Toggle = 'toggle',
+  Blur = 'blur'
+}
 
 defineProps<{
   flag?: boolean
@@ -8,8 +14,11 @@ defineProps<{
 }>()
 
 defineEmits<{
-  (e: 'delete', id: string): void
+  (e: emitsActions.Delete, id: string): void
+  (e: emitsActions.Toggle, id: string): void
+  (e: emitsActions.Blur): void
 }>()
+
 </script>
 
 <template>
@@ -22,9 +31,10 @@ defineEmits<{
       v-for="el in todoListCard"
       v-model="el.text"
       v-model:done="el.done"
+      @toggle="$emit(emitsActions.Toggle, el.id)"
       :key="el.id"
-      :elId="el.id"
-      @delete="$emit('delete', $event)"
+      @delete="$emit(emitsActions.Delete, el.id)"
+      @blur="$emit(emitsActions.Blur)"
     />
   </ul>
   <div
@@ -48,6 +58,27 @@ $todoListRowGap: 8px;
 .todo__list {
   display: grid;
   row-gap: $todoListRowGap;
+
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $color-gray-4;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: $color-dark-2;
+  }
 }
 
 .todo__empty-message {

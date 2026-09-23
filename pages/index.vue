@@ -5,6 +5,11 @@ import TodoList from '@/entities/ui/TodoList.vue'
 import { useTodoStore } from '@/entities/model/store'
 import TodoStats from '@/features/ui/TodoStats.vue'
 import { ButtonType, ButtonVariant } from '@/shared/ui/Button/model/type'
+enum TextButtons {
+  Change = 'редактировать',
+  Delete = 'удалить',
+  Create = 'Создать заметку',
+}
 
 const store = useTodoStore()
 function handleCreateNote() {
@@ -17,9 +22,10 @@ function handleCreateNote() {
   <div>
     <header class="header">
       <Button
-        styleView="button"
-        text="Создать заметку"
-        @click.prevent="handleCreateNote"
+        :variant="ButtonVariant.Primary"
+        :text="TextButtons.Create"
+        :buttonType="ButtonType.Button"
+        @click="handleCreateNote"
       />
     </header>
 
@@ -42,15 +48,15 @@ function handleCreateNote() {
           <template #actions>
             <Button
               :variant="ButtonVariant.Primary"
-              text="Редактировать"
+              :text="TextButtons.Change"
               :buttonType="ButtonType.Button"
-              @click.prevent="navigateTo(`/note/${el.id}`)"
+              @click="navigateTo(`/note/${el.id}`)"
             />
             <Button
               :variant="ButtonVariant.Primary"
-              text="Удалить"
+              :text="TextButtons.Delete"
               :buttonType="ButtonType.Button"
-              @click.prevent="store.deleteTodoCard(el.id)"
+              @click="store.deleteTodoCard(el.id)"
             />
           </template>
         </Todo>
@@ -59,7 +65,7 @@ function handleCreateNote() {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use '@/assets/styles/variables' as *;
 .header {
   width: 100%;

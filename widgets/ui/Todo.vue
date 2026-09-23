@@ -34,7 +34,7 @@
   border: $border;
   border-radius: $border-radius;
   box-shadow: $box-shadow;
-  margin: 40px auto;
+  margin: 40px auto 0;
 }
 
 .todo__title {

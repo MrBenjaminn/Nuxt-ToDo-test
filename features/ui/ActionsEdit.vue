@@ -5,17 +5,25 @@ import Save from '@/shared/icons/save.svg'
 import Button from '@/shared/ui/Button/Button.vue'
 import { ButtonVariant } from '@/shared/ui/Button/model/type'
 
-enum ButtonActions {
+enum InfoButtonActions {
   Back = 'назад',
   Undo = 'отменить',
   Redo = 'повторить',
   Save = 'сохранить',
 }
 
-defineEmits<{
-  (e: 'save'): void
-  (e: 'redo'): void
-  (e: 'undo'): void
+enum ButtonActions {
+  Back = 'back',
+  Save = 'save',
+  Redo = 'redo',
+  Undo = 'undo',
+}
+
+const emit = defineEmits<{
+  (e: ButtonActions.Back): void
+  (e: ButtonActions.Save): void
+  (e: ButtonActions.Redo): void
+  (e: ButtonActions.Undo): void
 }>()
 
 const props = withDefaults(
@@ -26,46 +34,42 @@ const props = withDefaults(
   {
     canUndo: false,
     canRedo: false,
-  }
+  },
 )
-
-async function backMain() {
-  await navigateTo('/')
-}
 </script>
 
 <template>
   <div class="todo__actions">
     <Button
       :variant="ButtonVariant.Icon"
-      :title="ButtonActions.Back"
-      @click="backMain"
+      :title="InfoButtonActions.Back"
+      @click="emit(ButtonActions.Back)"
     >
       <BackArrow />
     </Button>
 
     <Button
       :variant="ButtonVariant.Icon"
-      :title="ButtonActions.Undo"
+      :title="InfoButtonActions.Undo"
       :disabled="!props.canUndo"
-      @click="$emit('undo')"
+      @click="$emit(ButtonActions.Undo)"
     >
       <UndoRedoArrow class="undo" />
     </Button>
 
     <Button
       :variant="ButtonVariant.Icon"
-      :title="ButtonActions.Redo"
+      :title="InfoButtonActions.Redo"
       :disabled="!props.canRedo"
-      @click="$emit('redo')"
+      @click="$emit(ButtonActions.Redo)"
     >
       <UndoRedoArrow class="redo" />
     </Button>
 
     <Button
       :variant="ButtonVariant.Icon"
-      :title="ButtonActions.Save"
-      @click="$emit('save')"
+      :title="InfoButtonActions.Save"
+      @click="$emit(ButtonActions.Save)"
     >
       <Save class="redo" />
     </Button>
@@ -78,9 +82,9 @@ async function backMain() {
   justify-content: start;
   column-gap: 10px;
   margin: auto auto 0;
-}
 
-.undo {
-  transform: scaleX(-1);
+  .undo {
+    transform: scaleX(-1);
+  }
 }
 </style>

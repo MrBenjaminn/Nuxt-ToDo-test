@@ -1,5 +1,9 @@
 import { defineStore } from 'pinia'
-import type { itemTodo, cardTodo } from '@/entities/type/type'
+import type { itemTodo, cardTodo, localStorage } from '@/entities/type/type'
+import { safeClone } from '@/shared/lib/cloneObj.ts'
+
+const CURRENT_VERSION = 1
+const STORAGE_KEY = 'my_notes_app_data'
 
 export const useTodoStore = defineStore('todo', () => {
   const allTodos = ref<cardTodo[]>([])
@@ -8,23 +12,54 @@ export const useTodoStore = defineStore('todo', () => {
     return (id: string) => allTodos.value.find((note) => note.id === id)
   })
 
-  function addTodoTask(obj: cardTodo) {
-    const newTodoList: itemTodo = {
-      id: crypto.randomUUID(),
-      text: '',
-      done: false,
+  function initStore() {
+    if (!import.meta.client) return
+
+    const rawData = localStorage.getItem(STORAGE_KEY)
+    if (!rawData) return
+
+    try {
+      const parsed: localStorage = JSON.parse(rawData)
+
+      if (parsed.version === CURRENT_VERSION) {
+        allTodos.value = parsed.todos || []
+      } else {
+        console.warn('Версия устарела. Выполнен сброс.')
+        allTodos.value = []
+      }
+    } catch (e) {
+      console.error('Ошибка при чтении localStorage:', e)
     }
-    obj.todoList.push(newTodoList)
   }
 
-  function deleteTodoTask(currentNote: cardTodo, idTask: string) {
-    const index = currentNote.todoList.findIndex((e) => e.id === idTask)
-    currentNote.todoList.splice(index, 1)
+  function persistToStorage() {
+    if (!import.meta.client) return
+
+    const dataToSave = {
+      version: CURRENT_VERSION,
+      todos: allTodos.value
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
+  }
+
+  function saveTodo(updatedNote: cardTodo) {
+    const index = allTodos.value.findIndex(n => n.id === updatedNote.id)
+    const clonedNote = safeClone(updatedNote)
+    if (index !== -1) {
+      allTodos.value[index] = clonedNote
+    } else {
+      allTodos.value.push(clonedNote)
+    }
+
+    persistToStorage()
   }
 
   function deleteTodoCard(id: string) {
     const index = allTodos.value.findIndex((e) => e.id === id)
-    allTodos.value.splice(index, 1)
+    if (index !== -1) {
+      allTodos.value.splice(index, 1)
+      persistToStorage()
+    }
   }
 
   function addTodoCard() {
@@ -42,11 +77,6 @@ export const useTodoStore = defineStore('todo', () => {
     return newId
   }
 
-  function updateNoteCard(obj: cardTodo) {
-    const index = allTodos.value.findIndex((e) => e.id === obj.id)
-    allTodos.value[index] = obj
-  }
-
   const totalCompletedCount = computed(() => {
     return allTodos.value.reduce((total, card) => {
       const completedInCard = card.todoList.filter((task) => task.done).length
@@ -57,11 +87,10 @@ export const useTodoStore = defineStore('todo', () => {
   return {
     getNoteById,
     allTodos,
-    addTodoTask,
-    deleteTodoTask,
     addTodoCard,
     deleteTodoCard,
-    updateNoteCard,
     totalCompletedCount,
+    saveTodo,
+    initStore
   }
 })

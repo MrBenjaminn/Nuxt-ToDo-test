@@ -1,39 +1,48 @@
 <script setup lang="ts">
-type InputSize = 'sm' | 'md'
+import { InputSize } from '@/shared/ui/input/model/type.ts'
+
+defineOptions({
+  inheritAttrs: false
+})
 
 interface Props {
-  description?: string
+  placeholder?: string
   size?: InputSize
-  isDone?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
-  size: 'md',
-  description: '',
-  isDone: false,
+  size: InputSize.Medium,
+  placeholder: '',
 })
 
-const model = defineModel<string>({ default: '' })
+const model = defineModel<string>({
+  default: '',
+})
+
+const emit = defineEmits<{
+  (e: 'blur', event: FocusEvent): void
+}>()
 </script>
 
 <template>
-  <div>
     <input
+      v-bind="$attrs"
       type="text"
       :class="[
         'inline-edit__input',
         `inline-edit__input--${size}`,
-        { 'inline-edit__input--done': isDone },
       ]"
-      :placeholder="description"
+      :placeholder="placeholder"
       v-model="model"
+      @blur="emit('blur', $event)"
     />
-  </div>
 </template>
 
 <style lang="scss" scoped>
 @use '@/assets/styles/variables' as *;
 .inline-edit {
+  width: 100%;
+
   &__input {
     line-height: 1.2;
     width: 100%;
@@ -47,6 +56,16 @@ const model = defineModel<string>({ default: '' })
       border-color 0.2s,
       background-color 0.2s;
 
+    &--done {
+      text-decoration: line-through;
+      color: $color-gray-4;
+    }
+
+    &:focus {
+      border-color: $color-gray-4;
+      background-color: #fff;
+    }
+
     &--sm {
       font-size: 16px;
       font-weight: 400;
@@ -55,11 +74,6 @@ const model = defineModel<string>({ default: '' })
     &--md {
       font-size: 24px;
       font-weight: 600;
-    }
-
-    &--done {
-      color: $color-gray-4;
-      text-decoration: line-through;
     }
   }
 }

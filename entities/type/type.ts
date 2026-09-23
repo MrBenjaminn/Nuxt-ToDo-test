@@ -1,3 +1,5 @@
+import {string} from "@eslint/css-tree";
+
 export interface itemTodo {
   id: string
   text: string
@@ -9,4 +11,9 @@ export interface cardTodo {
   title: string
   todoList: itemTodo[]
   lastUpdate: number
+}
+
+export interface localStorage {
+  version: number
+  todos: cardTodo[]
 }

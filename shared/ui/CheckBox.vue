@@ -1,73 +1,95 @@
 <script setup lang="ts">
 defineProps<{
-  labelText?: string
-  labelShow?: boolean
-  checkBoxDisabled?: boolean
+  label?: string
+  disabled?: boolean
 }>()
 
 const isChecked = defineModel<boolean>({ default: false })
+const uniqueId = useId()
 </script>
 
 <template>
-  <input
-    class="todo-item__checkbox"
-    id="checkbox"
-    type="checkbox"
-    :disabled="checkBoxDisabled"
-    v-model="isChecked"
-  />
-  <label
-    class="todo-item__label"
-    for="checkbox"
-    v-show="labelShow"
-  >
-    {{ labelText }}
-  </label>
+  <div class="item-checkbox" :class="{ 'item-checkbox--disabled': disabled }">
+    <input
+      class="item-checkbox__input"
+      :id="uniqueId"
+      type="checkbox"
+      :disabled="disabled"
+      v-model="isChecked"
+    />
+    <label
+      v-if="label || $slots.default"
+      class="item-checkbox__label"
+      :for="uniqueId"
+    >
+      <slot>
+        {{ label }}
+      </slot>
+    </label>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 @use '@/assets/styles/variables' as *;
 
-.todo-item__checkbox {
-  flex-shrink: 0;
-  appearance: none;
-  position: relative;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  border: 1px solid $color-gray-4;
-  border-radius: 4px;
+.item-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 
-  &:checked {
-    background-color: $color-dark-2;
-    border-color: $color-dark-2;
+  &--disabled {
 
-    & + .todo-item__label {
-      color: $color-gray-4;
-      text-decoration: line-through;
+    .item-checkbox__input {
+      cursor: not-allowed;
+    }
+    .item-checkbox__label {
+      cursor: default;
     }
   }
 
-  &:not(:checked) {
+  &__input {
+    flex-shrink: 0;
+    appearance: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    border: 1px solid $color-gray-4;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+
+    &:focus-visible {
+      outline: 2px solid $color-dark-2;
+      outline-offset: 2px;
+    }
+
+    &:checked {
+      background-color: $color-dark-2;
+      border-color: $color-dark-2;
+
+      &::after {
+        opacity: 1;
+      }
+    }
+
     &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      translate: -50% -50%;
+      width: 14px;
+      height: 14px;
+      background: url('../icons/icon-check_white.svg') center/contain no-repeat;
       opacity: 0;
+      transition: opacity 0.15s ease;
     }
   }
 
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    width: 16px;
-    height: 16px;
-    background: url('../icons/icon-check_white.svg') center/contain no-repeat;
+  &__label {
+    cursor: pointer;
+    user-select: none;
   }
-}
-
-.todo-item__label {
-  width: 100%;
-  pointer-events: none;
 }
 </style>
