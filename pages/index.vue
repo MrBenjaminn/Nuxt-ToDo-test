@@ -9,7 +9,7 @@ import {
   ButtonType,
   ButtonVariant
 } from '@/shared/ui/Button/model/type'
-import { useTodoModals } from "@/shared/ui/modal/model/useTodoModals.ts";
+import { useTodoModals } from "@/shared/ui/modal/model/useTodoModals";
 import Modal from "@/shared/ui/modal/Modal.vue";
 
 const buttonLabels = {
@@ -19,8 +19,10 @@ const buttonLabels = {
 } as const
 
 const store = useTodoStore()
+const isNavigating = ref(false)
 const noteToDeleteId = ref<string | null>(null)
 function handleCreateNote() {
+  isNavigating.value = true
   const newNoteId = store.addTodoCard()
   navigateTo(`/note/${newNoteId}`)
 }
@@ -57,7 +59,10 @@ function openDeleteModal(id: string) {
       />
     </header>
 
-    <main class="main-page">
+    <main
+      v-if="!isNavigating"
+      class="main-page"
+    >
       <section class="content">
         <Todo
           v-for="el in store.allTodos"

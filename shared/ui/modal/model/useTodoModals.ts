@@ -1,4 +1,3 @@
-import { ref, computed } from 'vue'
 import { type ModalType } from '@/shared/ui/modal/type/type'
 
 interface UseNoteModalsParams {

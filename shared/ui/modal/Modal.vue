@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
 import { vFocusTrap } from '@/shared/directives/vFocusTrap'
 import SmallDeleteMark from '@/shared/icons/small-delete-mark.svg?component'
 import Button from '@/shared/ui/Button/Button.vue'

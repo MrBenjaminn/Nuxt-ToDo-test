@@ -13,7 +13,7 @@ export interface cardTodo {
   lastUpdate: number
 }
 
-export interface localStorage {
+export interface localStorageStructure {
   version: number
   todos: cardTodo[]
 }

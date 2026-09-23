@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import { ref } from 'vue'
 import { useHistory } from './useHistory'
 
 describe('useHistory composable', () => {
@@ -60,5 +59,29 @@ describe('useHistory composable', () => {
     })
 
     expect(canRedo.value).toBe(false)
+  })
+
+  it('сначала коммитит текст по таймеру, а затем применяет атомарное действие', async () => {
+    const target = ref({ title: 'Начальный текст', todoList: [{ id: '1', text: 'Задача 1', done: false }] })
+    const { undo, canUndo, recordAtomic } = useHistory(target, '', 50, 50)
+
+    target.value.title = 'Новый вводимый текст'
+
+    await new Promise((resolve) => setTimeout(resolve, 60))
+
+    recordAtomic(() => {
+      if (target.value?.todoList?.[0]) {
+        target.value.todoList[0].done = true
+      }
+    })
+
+    expect(canUndo.value).toBe(true)
+
+    undo()
+    expect(target.value?.todoList?.[0]?.done).toBe(false)
+    expect(target.value?.title).toBe('Новый вводимый текст')
+
+    undo()
+    expect(target.value?.title).toBe('Начальный текст')
   })
 })

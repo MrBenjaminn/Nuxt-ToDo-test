@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import { ButtonSize, ButtonType, ButtonVariant } from '@/shared/ui/Button/model/type'
 import Plus from '@/shared/icons/plus.svg?component'
 import Button from '@/shared/ui/Button/Button.vue'
-import { ButtonSize, ButtonType, ButtonVariant } from '@/shared/ui/Button/model/type'
 import ActionsEdit from '@/features/ui/ActionsEdit.vue'
 import HeaderEdit from '@/features/ui/HeaderEdit.vue'
+import TodoList from '@/entities/ui/TodoList.vue'
+import Modal from '@/shared/ui/modal/Modal.vue'
 import Todo from '@/widgets/ui/Todo.vue'
 import { useNoteDraft } from '@/features/model/useDraftTodo'
 import { useTodoStore } from '@/entities/model/store'
-import TodoList from '@/entities/ui/TodoList.vue'
 import { useKeybind } from '@/features/model/useKeybind'
-import Modal from '@/shared/ui/modal/Modal.vue'
 import { useTodoRouteGuard } from '@/features/model/useTodoRouteGuard'
 import { useTodoModals } from '@/shared/ui/modal/model/useTodoModals'
 import { vFocusTrap } from '@/shared/directives/vFocusTrap'
@@ -25,12 +25,12 @@ const todoNote = computed(() => store.getNoteById(noteId))
 const { activeModal, isModalOpen, modalConfig, handleConfirm, handleCancel } = useTodoModals({
   onDelete: async () => {
     discardDraft()
-    store.deleteTodoCard(todoId)
+    store.deleteTodoCard(noteId)
     await navigateTo('/')
   },
   onConfirmEmptyDelete: async () => {
     discardDraft()
-    store.deleteTodoCard(todoId)
+    store.deleteTodoCard(noteId)
     await navigateTo('/')
   },
   onSaveRestore: async () => {
@@ -51,7 +51,7 @@ const isDraftDirty = computed(() => {
   return JSON.stringify(note.value) !== JSON.stringify(draftNote.value)
 })
 
-const { todoId, note, checkNoteExists } = useTodoRouteGuard(isDraftDirty, activeModal)
+const { note, checkNoteExists } = useTodoRouteGuard(isDraftDirty, activeModal)
 
 const {
   draftNote,
@@ -67,7 +67,7 @@ const {
   save,
   discardDraft,
   isEmptyTodo
-} = useNoteDraft(todoId)
+} = useNoteDraft(noteId)
 
 useKeybind(
   () => undo(),
@@ -111,6 +111,7 @@ watch(
   todoNote,
   (currentNote) => {
     if (!currentNote) {
+      discardDraft()
       router.replace('/')
     }
   },

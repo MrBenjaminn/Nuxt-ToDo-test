@@ -1,4 +1,3 @@
-import { computed, type Ref } from 'vue'
 import { useTodoStore } from '@/entities/model/store'
 import { type ModalType } from '@/shared/ui/modal/type/type'
 

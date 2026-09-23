@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import type { itemTodo, cardTodo, localStorage } from '@/entities/type/type'
-import { safeClone } from '@/shared/lib/cloneObj.ts'
+import type { cardTodo, localStorageStructure } from '@/entities/type/type'
+import { safeClone } from '@/shared/lib/cloneObj'
 
 const CURRENT_VERSION = 1
 const STORAGE_KEY = 'my_notes_app_data'
@@ -21,7 +21,7 @@ export const useTodoStore = defineStore('todo', () => {
     if (!rawData) return
 
     try {
-      const parsed: localStorage = JSON.parse(rawData)
+      const parsed: localStorageStructure = JSON.parse(rawData)
 
       if (parsed.version === CURRENT_VERSION) {
         allTodos.value = parsed.todos || []

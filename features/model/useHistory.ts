@@ -1,5 +1,4 @@
 import { safeClone } from '@/shared/lib/cloneObj'
-import { ref, computed, watch, nextTick, type Ref } from 'vue'
 
 export function useHistory<T>(
   targetRef: Ref<T | null | undefined>,
@@ -160,11 +159,15 @@ export function useHistory<T>(
   }
 
   function recordAtomic(mutationFn: () => void) {
-    if (debounceTimer || pendingState !== null) {
-      commit()
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
     }
 
-    if (targetRef.value) {
+    if (pendingState !== null) {
+      pushToHistory(pendingState)
+      pendingState = null
+    } else if (targetRef.value) {
       pushToHistory(safeClone(targetRef.value))
     }
 

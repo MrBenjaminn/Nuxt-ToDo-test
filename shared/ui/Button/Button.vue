@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ButtonVariant, ButtonType, ButtonSize } from '@/shared/ui/Button/model/type'
-import { computed } from 'vue'
 
 interface Props {
   text?: string
