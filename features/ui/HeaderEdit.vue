@@ -3,9 +3,10 @@ import Button from '@/shared/ui/Button/Button.vue'
 import DeleteMark from '@/shared/icons/delete-mark.svg'
 import Input from '@/shared/ui/input/Input.vue'
 import { ButtonVariant } from '@/shared/ui/Button/model/type'
-import { InputSize } from '#shared/ui/input/model/type.ts'
+import { InputSize } from '@/shared/ui/input/model/type'
+import { vTooltip } from '@/shared/directives/vTooltip'
 
-const title = defineModel<string>('text')
+const title = defineModel<string>()
 
 const emit = defineEmits<{
   (e: 'deleteNote'): void
@@ -16,15 +17,16 @@ const emit = defineEmits<{
 <template>
   <div class="todo__header">
     <Input
-      description="Введите название..."
+      placeholder="Введите название..."
       :size="InputSize.Medium"
       v-model="title"
       @blur="emit('blur')"
     />
     <Button
       :variant="ButtonVariant.Icon"
-      title="Удалить"
       @click="emit('deleteNote')"
+      v-tooltip="'Удалить'"
+      ariaLabel="Удалить заметку"
     >
       <DeleteMark />
     </Button>

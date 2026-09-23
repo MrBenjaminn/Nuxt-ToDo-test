@@ -1,4 +1,4 @@
-import { safeClone } from '../../shared/lib/cloneObj'
+import { safeClone } from '@/shared/lib/cloneObj'
 import { ref, computed, watch, nextTick, type Ref } from 'vue'
 
 export function useHistory<T>(
@@ -201,6 +201,6 @@ export function useHistory<T>(
     canRedo,
     handleBlur,
     recordAtomic,
-    clearHistory
+    clearHistory,
   }
 }

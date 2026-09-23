@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import TodoItem from '@/entities/ui/TodoItem.vue'
-import  { type itemTodo, } from '@/entities/type/type'
+import { type itemTodo } from '@/entities/type/type'
 
 enum emitsActions {
   Delete = 'delete',
   Toggle = 'toggle',
-  Blur = 'blur'
+  Blur = 'blur',
 }
 
 defineProps<{
@@ -13,12 +13,11 @@ defineProps<{
   todoListCard?: itemTodo[]
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: emitsActions.Delete, id: string): void
   (e: emitsActions.Toggle, id: string): void
   (e: emitsActions.Blur): void
 }>()
-
 </script>
 
 <template>
@@ -31,10 +30,10 @@ defineEmits<{
       v-for="el in todoListCard"
       v-model="el.text"
       v-model:done="el.done"
-      @toggle="$emit(emitsActions.Toggle, el.id)"
+      @toggle="emit(emitsActions.Toggle, el.id)"
+      @delete="emit(emitsActions.Delete, el.id)"
+      @blur="emit(emitsActions.Blur)"
       :key="el.id"
-      @delete="$emit(emitsActions.Delete, el.id)"
-      @blur="$emit(emitsActions.Blur)"
     />
   </ul>
   <div

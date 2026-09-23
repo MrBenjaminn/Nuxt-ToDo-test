@@ -2,7 +2,7 @@
 import { InputSize } from '@/shared/ui/input/model/type.ts'
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 interface Props {
@@ -25,17 +25,14 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <input
-      v-bind="$attrs"
-      type="text"
-      :class="[
-        'inline-edit__input',
-        `inline-edit__input--${size}`,
-      ]"
-      :placeholder="placeholder"
-      v-model="model"
-      @blur="emit('blur', $event)"
-    />
+  <input
+    v-bind="$attrs"
+    type="text"
+    :class="['inline-edit__input', `inline-edit__input--${size}`]"
+    :placeholder="placeholder"
+    v-model="model"
+    @blur="emit('blur', $event)"
+  />
 </template>
 
 <style lang="scss" scoped>

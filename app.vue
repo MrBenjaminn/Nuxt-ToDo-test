@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useTodoStore } from '@/entities/model/store'
+import '@/assets/styles/tooltip.scss'
 
 const store = useTodoStore()
 
@@ -10,7 +11,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <NuxtPage />
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
 
 <style scoped></style>

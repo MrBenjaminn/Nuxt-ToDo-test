@@ -3,23 +3,17 @@ import Input from '@/shared/ui/input/Input.vue'
 import CheckBox from '@/shared/ui/CheckBox.vue'
 import Button from '@/shared/ui/Button/Button.vue'
 import { ButtonVariant } from '@/shared/ui/Button/model/type'
-import { InputSize } from '#shared/ui/input/model/type.ts'
+import { InputSize } from '@/shared/ui/input/model/type'
+import SmallDeleteMark from '@/shared/icons/small-delete-mark.svg?component'
 
-enum emitsActions {
-  Delete = 'delete',
-  Toggle = 'toggle',
-  Blur = 'blur'
-}
-
-const props = defineProps<{
+defineProps<{
   isEditing?: boolean
-  done?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: emitsActions.Delete): void
-  (e: emitsActions.Toggle): void
-  (e: emitsActions.Blur): void
+  (e: 'delete'): void
+  (e: 'toggle'): void
+  (e: 'blur'): void
 }>()
 
 const textModel = defineModel<string>({ default: '' })
@@ -31,35 +25,22 @@ const isDoneModel = defineModel<boolean>('done', { default: false })
     <template v-if="isEditing">
       <CheckBox
         :labelShow="false"
-        :modelValue="props.done"
-        @update:modelValue="emit(emitsActions.Toggle)"
+        :modelValue="isDoneModel"
+        @update:modelValue="emit('toggle')"
       />
       <Input
         v-model="textModel"
         :size="InputSize.Small"
         :isDone="isDoneModel"
-        @blur="emit(emitsActions.Blur)"
+        @blur="emit('blur')"
         :class="{ 'inline-edit__input--done': isDoneModel }"
       />
       <Button
         :variant="ButtonVariant.Secondary"
-        @click="emit(emitsActions.Delete)"
+        :aria-label="'Удалить задачу'"
+        @click="emit('delete')"
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M15 5L5 15M5 5L15 15"
-            stroke="#757575"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <SmallDeleteMark />
       </Button>
     </template>
     <template v-else>
@@ -87,7 +68,7 @@ $todoListRowGap: 8px;
   transition-duration: $transition-duration;
   height: 45px;
 
-  &:hover{
+  &:hover {
     background-color: $color-gray-1;
   }
 
@@ -110,13 +91,6 @@ $todoListRowGap: 8px;
       color: $color-gray-4;
       text-decoration: line-through;
     }
-  }
-}
-
-.todo-item__label--done {
-  :deep(.item-checkbox__label) {
-    text-decoration: line-through;
-    color: $color-gray-4;
   }
 }
 </style>

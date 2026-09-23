@@ -1,27 +1,46 @@
 <script setup lang="ts">
-import { ButtonVariant, ButtonType } from '@/shared/ui/Button/model/type'
+import { ButtonVariant, ButtonType, ButtonSize } from '@/shared/ui/Button/model/type'
+import { computed } from 'vue'
 
 interface Props {
   text?: string
-  title?: string
   buttonType?: ButtonType
   variant?: ButtonVariant
+  size?: ButtonSize
   disabled?: boolean
+  ariaLabel?: string
 }
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   buttonType: ButtonType.Button,
   variant: ButtonVariant.Primary,
+  size: ButtonSize.Medium,
   disabled: false,
 })
+
+const emit = defineEmits<{
+  (e: 'click', event: MouseEvent): void
+}>()
+
+const buttonClasses = computed(() => [
+  'button',
+  `button--${props.variant}`,
+  `button--size-${props.size}`,
+])
+
+function handleClick(event: MouseEvent) {
+  if (!props.disabled) {
+    emit('click', event)
+  }
+}
 </script>
 
 <template>
   <button
-    :class="[variant, { 'has-tooltip': title }]"
+    :class="buttonClasses"
     :type="buttonType"
-    :data-title="title"
-    :aria-label="title"
+    :aria-label="ariaLabel"
     :disabled="disabled"
+    @click="handleClick"
   >
     <slot>{{ text }}</slot>
   </button>
@@ -30,9 +49,13 @@ withDefaults(defineProps<Props>(), {
 <style lang="scss" scoped>
 @use '@/assets/styles/variables' as *;
 
-button {
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: inherit;
   font-size: inherit;
+  padding: 0;
   cursor: pointer;
   user-select: none;
   transition:
@@ -51,11 +74,19 @@ button {
     opacity: 0.5;
   }
 
-  &.primary {
-    display: inline-flex;
-    align-items: center;
+  &--size-md {
     height: $input-height;
-    padding: 12px;
+    padding: 14px;
+    border-radius: $border-radius;
+  }
+
+  &--size-bg {
+    height: 50px;
+    padding: 0 10px;
+    border-radius: $border-radius;
+  }
+
+  &--primary {
     color: $color-gray-1;
     background-color: $color-dark-2;
     border: 1px solid $color-dark-2;
@@ -71,15 +102,11 @@ button {
     }
   }
 
-  &.secondary {
+  &--secondary {
     flex-shrink: 0;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
     width: 44px;
     height: 44px;
     margin-left: auto;
-    padding: 0;
     color: $color-gray-4;
     background-color: transparent;
     border: none;
@@ -99,10 +126,8 @@ button {
     }
   }
 
-  &.tertiary {
+  &--tertiary {
     padding-left: 10px;
-    display: flex;
-    align-items: center;
     column-gap: 20px;
     width: fit-content;
     background: transparent;
@@ -115,11 +140,8 @@ button {
     }
   }
 
-  &.icon {
+  &--icon {
     padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     column-gap: 20px;
     background: transparent;
     border: none;
@@ -130,40 +152,6 @@ button {
     &:hover {
       background-color: $color-gray-2;
       transform: scale(1.05);
-    }
-  }
-
-  &.has-tooltip {
-    position: relative;
-
-    &::after {
-      content: attr(data-title);
-      position: absolute;
-      top: 120%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-4px);
-
-      padding: 4px 8px;
-      font-size: 12px;
-      line-height: 1.2;
-      white-space: nowrap;
-      color: $color-black;
-      background-color: $color-gray-3;
-      border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-
-      transition:
-        opacity 0.1s ease,
-        visibility 0.1s ease;
-    }
-
-    &:hover::after {
-      opacity: 1;
-      visibility: visible;
     }
   }
 }

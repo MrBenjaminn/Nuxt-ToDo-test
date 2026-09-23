@@ -5,11 +5,12 @@ import TodoList from '@/entities/ui/TodoList.vue'
 import { useTodoStore } from '@/entities/model/store'
 import TodoStats from '@/features/ui/TodoStats.vue'
 import { ButtonType, ButtonVariant } from '@/shared/ui/Button/model/type'
-enum TextButtons {
-  Change = 'редактировать',
-  Delete = 'удалить',
-  Create = 'Создать заметку',
-}
+
+const BUTTON_LABELS = {
+  CHANGE: 'Редактировать',
+  DELETE: 'Удалить',
+  CREATE: 'Создать заметку',
+} as const
 
 const store = useTodoStore()
 function handleCreateNote() {
@@ -23,7 +24,7 @@ function handleCreateNote() {
     <header class="header">
       <Button
         :variant="ButtonVariant.Primary"
-        :text="TextButtons.Create"
+        :text="BUTTON_LABELS.CREATE"
         :buttonType="ButtonType.Button"
         @click="handleCreateNote"
       />
@@ -36,7 +37,7 @@ function handleCreateNote() {
           :key="el.id"
         >
           <template #header>
-            <h1 class="todo__title">{{ el.title }}</h1>
+            <h3 class="todo__title">{{ el.title }}</h3>
             <TodoStats :todoList="el.todoList" />
           </template>
 
@@ -48,13 +49,13 @@ function handleCreateNote() {
           <template #actions>
             <Button
               :variant="ButtonVariant.Primary"
-              :text="TextButtons.Change"
+              :text="BUTTON_LABELS.CHANGE"
               :buttonType="ButtonType.Button"
               @click="navigateTo(`/note/${el.id}`)"
             />
             <Button
               :variant="ButtonVariant.Primary"
-              :text="TextButtons.Delete"
+              :text="BUTTON_LABELS.DELETE"
               :buttonType="ButtonType.Button"
               @click="store.deleteTodoCard(el.id)"
             />

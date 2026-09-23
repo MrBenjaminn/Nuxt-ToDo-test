@@ -1,7 +1,7 @@
 import { useTodoStore } from '@/entities/model/store'
-import { safeClone } from '#shared/lib/cloneObj'
+import { safeClone } from '@/shared/lib/cloneObj'
 import type { cardTodo, itemTodo } from '@/entities/type/type'
-import { useHistory } from "~/features/model/useHistory.ts";
+import { useHistory } from '@/features/model/useHistory'
 
 export function useNoteDraft(noteId?: string) {
   const store = useTodoStore()
@@ -9,16 +9,10 @@ export function useNoteDraft(noteId?: string) {
 
   const draftKey = `note_draft_${noteId}`
 
-  const {
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    handleBlur,
-    recordAtomic,
-    clearHistory,
-  } = useHistory(draftNote, draftKey)
-
+  const { undo, redo, canUndo, canRedo, handleBlur, recordAtomic, clearHistory } = useHistory(
+    draftNote,
+    draftKey,
+  )
 
   function initDraft() {
     if (!import.meta.client || !noteId) return
@@ -102,6 +96,18 @@ export function useNoteDraft(noteId?: string) {
     }
   }
 
+  function discardDraft() {
+    if (!import.meta.client || !noteId) return
+
+    if (draftTimeout) clearTimeout(draftTimeout)
+
+    localStorage.removeItem(draftKey)
+
+    clearHistory()
+
+    draftNote.value = null
+  }
+
   return {
     draftNote,
     initDraft,
@@ -114,5 +120,6 @@ export function useNoteDraft(noteId?: string) {
     canRedo,
     handleBlur,
     save,
+    discardDraft,
   }
 }

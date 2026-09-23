@@ -1,4 +1,4 @@
-import {string} from "@eslint/css-tree";
+import { string } from '@eslint/css-tree'
 
 export interface itemTodo {
   id: string

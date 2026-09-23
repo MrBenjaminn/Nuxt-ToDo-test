@@ -9,7 +9,10 @@ const uniqueId = useId()
 </script>
 
 <template>
-  <div class="item-checkbox" :class="{ 'item-checkbox--disabled': disabled }">
+  <div
+    class="item-checkbox"
+    :class="{ 'item-checkbox--disabled': disabled }"
+  >
     <input
       class="item-checkbox__input"
       :id="uniqueId"
@@ -38,7 +41,6 @@ const uniqueId = useId()
   gap: 8px;
 
   &--disabled {
-
     .item-checkbox__input {
       cursor: not-allowed;
     }
@@ -57,7 +59,9 @@ const uniqueId = useId()
     border: 1px solid $color-gray-4;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
 
     &:focus-visible {
       outline: 2px solid $color-dark-2;

@@ -8,6 +8,8 @@ const STORAGE_KEY = 'my_notes_app_data'
 export const useTodoStore = defineStore('todo', () => {
   const allTodos = ref<cardTodo[]>([])
 
+  let isListenerAttached = false
+
   const getNoteById = computed(() => {
     return (id: string) => allTodos.value.find((note) => note.id === id)
   })
@@ -30,6 +32,15 @@ export const useTodoStore = defineStore('todo', () => {
     } catch (e) {
       console.error('Ошибка при чтении localStorage:', e)
     }
+
+    if (!isListenerAttached) {
+      window.addEventListener('storage', (event) => {
+        if (event.key === STORAGE_KEY) {
+          initStore()
+        }
+      })
+      isListenerAttached = true
+    }
   }
 
   function persistToStorage() {
@@ -37,13 +48,13 @@ export const useTodoStore = defineStore('todo', () => {
 
     const dataToSave = {
       version: CURRENT_VERSION,
-      todos: allTodos.value
+      todos: allTodos.value,
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
   }
 
   function saveTodo(updatedNote: cardTodo) {
-    const index = allTodos.value.findIndex(n => n.id === updatedNote.id)
+    const index = allTodos.value.findIndex((n) => n.id === updatedNote.id)
     const clonedNote = safeClone(updatedNote)
     if (index !== -1) {
       allTodos.value[index] = clonedNote
@@ -72,7 +83,8 @@ export const useTodoStore = defineStore('todo', () => {
       lastUpdate: Date.now(),
     }
 
-    allTodos.value.push(newNote)
+    allTodos.value.push(safeClone(newNote))
+    persistToStorage()
 
     return newId
   }
@@ -84,6 +96,10 @@ export const useTodoStore = defineStore('todo', () => {
     }, 0)
   })
 
+  if (import.meta.client) {
+    initStore()
+  }
+
   return {
     getNoteById,
     allTodos,
@@ -91,6 +107,6 @@ export const useTodoStore = defineStore('todo', () => {
     deleteTodoCard,
     totalCompletedCount,
     saveTodo,
-    initStore
+    initStore,
   }
 })
